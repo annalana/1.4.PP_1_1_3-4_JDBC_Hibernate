@@ -3,10 +3,7 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLSyntaxErrorException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +42,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            String a = String.format("INSERT INTO kata.userstable (username, lastname, age) VALUES ('%s', '%s', %d)",
-                    name, lastName, age);
-            connection.prepareStatement(a).executeUpdate();
+            String sql = "INSERT INTO kata.userstable (username, lastname, age) VALUES (?, ?, ?)";
+            PreparedStatement sqlStatement = connection.prepareStatement(sql);
+            sqlStatement.setString(1, name);
+            sqlStatement.setString(2, lastName);
+            sqlStatement.setInt(3, age);
+            sqlStatement.executeUpdate();
             System.out.printf("User с именем – %s добавлен в базу данных\n", name);
         } catch (Exception e) {
             System.out.println("Error when saving user");
@@ -57,7 +57,10 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         try {
-            connection.prepareStatement(String.format("DELETE FROM kata.userstable WHERE id=%d", id)).executeUpdate();
+            String sql = "DELETE FROM kata.userstable WHERE id=?";
+            PreparedStatement sqlStatement = connection.prepareStatement(sql);
+            sqlStatement.setLong(1, id);
+            sqlStatement.executeUpdate();
         } catch (Exception e) {
             System.out.println("Error when removing user");
             e.printStackTrace();
@@ -68,7 +71,9 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> userList = new ArrayList<>();
         User newUser;
         try {
-            ResultSet users = connection.prepareStatement("SELECT * from kata.userstable").executeQuery();
+            String sql = "SELECT * from kata.userstable";
+
+            ResultSet users = connection.prepareStatement(sql).executeQuery();
             while (users.next()) {
                 users.getInt("id");
                 newUser = new User(users.getString("username"), users.getString("lastname"),
