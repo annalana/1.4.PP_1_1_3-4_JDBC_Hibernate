@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 public class Util {
     // реализуйте настройку соеденения с БД
     public static Connection getConnection() {
-        return getConnection("jdbc:mysql://localhost:3306", "root", "Eve02041991");
+        return getConnection("jdbc:mysql://localhost:3306", "root", "root");
     }
     public static Connection getConnection(String user, String password) {
         return getConnection("jdbc:mysql://localhost:3306", user, password);
