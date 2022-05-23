@@ -2,7 +2,6 @@ package jm.task.core.jdbc;
 import jm.task.core.jdbc.service.UserServiceImpl;
 public class Main {
     public static void main(String[] args) {
-        // Настройка соединения в классе Util
         UserServiceImpl userService = new UserServiceImpl();
         userService.createUsersTable();
         userService.saveUser("Anya", "Shcherbedinskaya", (byte)28);

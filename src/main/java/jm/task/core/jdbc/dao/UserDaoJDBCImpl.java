@@ -13,16 +13,12 @@ import java.util.List;
 public class UserDaoJDBCImpl implements UserDao {
     private final Connection connection;
     private Statement statement;
-    public UserDaoJDBCImpl() {
-        this(Util.getConnection());
-    }
-    public UserDaoJDBCImpl(Connection connection) {
-        this.connection = connection;
+    public UserDaoJDBCImpl(){
+        connection = Util.getConnection();
         try {
             statement = connection.createStatement();
         } catch (Exception e) {
             System.out.println("Error while creating statement");
-            e.printStackTrace();
         }
     }
     public void createUsersTable()  {
@@ -48,10 +44,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        StringBuilder userData = new StringBuilder("INSERT INTO kata.userstable (username, lastname, age) VALUES ('")
-                .append(name).append("', '"). append(lastName).append("', ").append(age).append(")");
         try {
-            statement.executeUpdate(userData.toString());
+            String a = String.format("INSERT INTO kata.userstable (username, lastname, age) VALUES ('%s', '%s', %d)",
+                    name, lastName, age);
+            connection.prepareStatement(a).executeUpdate();
             System.out.printf("User с именем – %s добавлен в базу данных\n", name);
         } catch (Exception e) {
             System.out.println("Error when saving user");
@@ -60,9 +56,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void removeUserById(long id) {
-        StringBuilder userData = new StringBuilder("DELETE FROM kata.userstable WHERE id=").append(id);
         try {
-            statement.executeUpdate(userData.toString());
+            connection.prepareStatement(String.format("DELETE FROM kata.userstable WHERE id=%d", id)).executeUpdate();
         } catch (Exception e) {
             System.out.println("Error when removing user");
             e.printStackTrace();
@@ -73,10 +68,11 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> userList = new ArrayList<>();
         User newUser;
         try {
-            ResultSet users = statement.executeQuery("SELECT * from kata.userstable");
+            ResultSet users = connection.prepareStatement("SELECT * from kata.userstable").executeQuery();
             while (users.next()) {
                 users.getInt("id");
-                newUser = new User(users.getString("username"), users.getString("lastname"), (byte)(users.getInt("age")));
+                newUser = new User(users.getString("username"), users.getString("lastname"),
+                        (byte)(users.getInt("age")));
                 newUser.setId(users.getLong("id"));
                 userList.add(newUser);
             }
