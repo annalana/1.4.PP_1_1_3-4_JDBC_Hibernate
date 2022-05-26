@@ -31,7 +31,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         try {
-            statement.execute("DROP TABLE kata.userstable");
+            statement.execute("DROP TABLE kata.users");
         } catch(SQLSyntaxErrorException e) {
             System.out.println("Table is not existing or something went wrong");
         }catch (Exception e) {
@@ -42,7 +42,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         try {
-            String sql = "INSERT INTO kata.userstable (username, lastname, age) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO kata.users (username, lastname, age) VALUES (?, ?, ?)";
             PreparedStatement sqlStatement = connection.prepareStatement(sql);
             sqlStatement.setString(1, name);
             sqlStatement.setString(2, lastName);
@@ -57,7 +57,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         try {
-            String sql = "DELETE FROM kata.userstable WHERE id=?";
+            String sql = "DELETE FROM kata.users WHERE id=?";
             PreparedStatement sqlStatement = connection.prepareStatement(sql);
             sqlStatement.setLong(1, id);
             sqlStatement.executeUpdate();
@@ -71,7 +71,7 @@ public class UserDaoJDBCImpl implements UserDao {
         List<User> userList = new ArrayList<>();
         User newUser;
         try {
-            String sql = "SELECT * from kata.userstable";
+            String sql = "SELECT * from kata.users";
 
             ResultSet users = connection.prepareStatement(sql).executeQuery();
             while (users.next()) {
@@ -90,7 +90,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         try {
-            statement.execute("DELETE from kata.userstable");
+            statement.execute("DELETE from kata.users");
         } catch (Exception e) {
             System.out.println("Error when getting cleaning table");
             e.printStackTrace();
