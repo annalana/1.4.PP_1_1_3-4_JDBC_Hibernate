@@ -1,17 +1,25 @@
 package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
-import jm.task.core.jdbc.util.HibernateUtil;
+import jm.task.core.jdbc.util.Util;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
-    private SessionFactory sessionFactory = HibernateUtil.getConnection();
+    private SessionFactory sessionFactory = Util.getSessionFactory();
     public UserDaoHibernateImpl() {
     }
     private Session getSession() {
+        try (Session session = sessionFactory.openSession();) {
+
+        } catch (HibernateException e) {
+            System.out.println();
+        }
         Session session = sessionFactory.openSession();
         session.getTransaction().begin();
         return session;
@@ -22,49 +30,110 @@ public class UserDaoHibernateImpl implements UserDao {
     }
     @Override
     public void createUsersTable() {
-        Session session = getSession();
-        String string = "CREATE TABLE IF NOT EXISTS users(id BIGINT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(15)," +
-                "lastname VARCHAR(20), age INT)";
-        session.createSQLQuery(string).addEntity(User.class).executeUpdate();
-        session.getTransaction().commit();
-        session.close();
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            String string = "CREATE TABLE IF NOT EXISTS users(id BIGINT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(15)," +
+                    "lastname VARCHAR(20), age INT)";
+            session.createSQLQuery(string).addEntity(User.class).executeUpdate();
+            transaction.commit();
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void dropUsersTable() {
-        Session session = getSession();
-        String string = "DROP TABLE IF EXISTS users";
-        session.createSQLQuery(string).addEntity(User.class).executeUpdate();
-        commitAndClose(session);
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            String string = "DROP TABLE IF EXISTS users";
+            session.createSQLQuery(string).addEntity(User.class).executeUpdate();
+            transaction.commit();
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Session session = getSession();
-        session.save(new User(name, lastName, age));
-        commitAndClose(session);
-        System.out.printf("User с именем – %s добавлен в базу данных\n", name);
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            session.save(new User(name, lastName, age));
+            transaction.commit();
+            System.out.printf("User с именем – %s добавлен в базу данных\n", name);
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = getSession();
-        session.delete(session.load(User.class, id));
-        commitAndClose(session);
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            session.delete(session.load(User.class, id));
+            transaction.commit();
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 
     @Override
     public List<User> getAllUsers() {
-        Session session = getSession();
-        List<User> users = session.createQuery("from User", User.class).getResultList();
-        commitAndClose(session);
+        Transaction transaction = null;
+        List<User> users = new ArrayList<>();
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            users = session.createQuery("FROM User", User.class).getResultList();
+            transaction.commit();
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
-        Session session = getSession();
-        session.createQuery("from User", User.class).stream().forEach(session::delete);
-        commitAndClose(session);
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession();) {
+            transaction = session.getTransaction();
+            transaction.begin();
+            String sql = "DELETE FROM users";
+            session.createSQLQuery(sql).addEntity(User.class).executeUpdate();
+            transaction.commit();
+        }catch (HibernateException e) {
+            System.out.println("Error while creating table");
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
     }
 }
